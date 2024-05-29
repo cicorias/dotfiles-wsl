@@ -130,3 +130,6 @@ findfile() {
     find . -type f -iname "$1"
 }
 
+alias fixtime="sudo ntpdate -u time.nist.gov"
+
+
