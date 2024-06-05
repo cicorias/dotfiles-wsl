@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Check if the date argument is provided
+if [ -z "$1" ]; then
+    echo "Usage: $0 <since-date>"
+    echo "Example: $0 '2023-01-01'"
+    exit 1
+fi
+
+since_date="$1"
+
+# Get the list of contributors
+contributors=$(git shortlog -s -n -e --since="$since_date" | awk '{$1=""; print $0}')
+
+echo "Contributor, Commits, Lines Added, Lines Deleted"
+
+# Loop through each contributor
+echo "$contributors" | while read -r contributor; do
+    email=$(echo "$contributor" | grep -o '<.*>' | tr -d '<>')
+
+    # Get commit count
+    commits=$(git log --since="$since_date" --author="$email" --pretty=oneline | wc -l)
+
+    # Get lines added and deleted
+    lines=$(git log --since="$since_date" --author="$email" --pretty=tformat: --numstat | awk '{add+=$1; del+=$2} END {print add "," del}')
+
+    # Output the result
+    echo "$contributor, $commits, $lines"
+done
